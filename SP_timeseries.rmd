@@ -1,7 +1,10 @@
 ---
-output: html_document
-editor_options: 
+editor_options:
   chunk_output_type: inline
+output:
+  word_document: default
+  pdf_document: default
+  html_document: default
 ---
 # Time Series Analysis of S&P 500
 
@@ -25,13 +28,18 @@ author: "Vijay Mudivedu"
 date: "6/6/2018"
 output: html_document
 ---
+```{r include=FALSE}
+#install.packages("tinytex")
+```
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 ```{r libraries, include=FALSE}
-
+library(tinytex)
 library(tseries)
 library(xts)
 library(tidyverse)
@@ -39,6 +47,7 @@ library(reshape2)
 library(forecast)
 library(lubridate)
 library(ggthemes)
+library(rmarkdown)
 ```
 
 Read Data from the CSV

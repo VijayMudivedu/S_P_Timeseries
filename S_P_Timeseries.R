@@ -17,8 +17,9 @@ install.packages("reshape2")
 install.packages("forecast")
 install.packages("lubridate")
 install.packages("ggthemes")
+install.packages("rmarkdown")
 
-
+library(tinytex)
 library(tseries)
 library(xts)
 library(tidyverse)
@@ -26,6 +27,7 @@ library(reshape2)
 library(forecast)
 library(lubridate)
 library(ggthemes)
+library(rmarkdown)
 
 # Read Data from the CSV
 
