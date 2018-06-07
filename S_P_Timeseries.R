@@ -190,7 +190,7 @@ lines(
 ggplot(data = sp_historical_cleaned, aes(close_price)) + 
   geom_histogram(aes(x = open, y = ..density.., fill = "red", alpha = 0.5),show.legend = FALSE) +
   geom_density(aes(y = ..density..,alpha = 0.1),show.legend = FALSE) +
-  labs(title = "Distribution of Close_price Data")
+  labs(title = "Distribution of Close_price Data") +
   theme_economist() +
   theme(axis.title.x = element_blank(),
         axis.title.y = element_blank(),
@@ -262,7 +262,7 @@ plot(
   x = sp_train$close_price,
   type = "l",
   col = "black",
-  lwd = 1, ylab =  "", xlab = ""
+  lwd = 1, ylab =  "", xlab = "", main = "Close Price Smoothing"
 )
 
 smoothed_moving_avg <-
@@ -280,7 +280,6 @@ smoothed_moving_avg
 
 # replacing the induced NAs as result of smoothing
 
-#for (i in 1: )
 lead_nas <- smoothed_moving_avg[w + 2] - smoothed_moving_avg[w + 1]
 
 trail_nas <-
@@ -311,7 +310,7 @@ lines(smoothed_moving_avg, type = "l", col = "blueviolet")
 alpha = seq(from = 0.09, to = 0.3, by = 0.1)
 plot(
   x = sp_historical_cleaned$close_price,
-  type = "l", ylab = "", xlab = "", main = "Verifying Smoothing - Holts Method",
+  type = "l", ylab = "", xlab = "", main = "Smoothing - Holts Method",
   col = "black",
   lwd = 2
 )
@@ -353,9 +352,8 @@ smoothing_holts <-
   )
 
 # Find smoothed series ----
-plot(sp_historical_cleaned$close_price, type = "l")
+plot(sp_historical_cleaned$close_price, type = "l", main = "Smoothed Series for alpha = 0.1", ylab = "", xlab = "")
 lines(smoothing_holts$fitted[, 1], type = "l", col = "red")
-
 
 # Creating a new dat frame for close_price and dates
 
@@ -398,6 +396,9 @@ lines(
   lwd = 3
 )
 
+legend(x = 1,y = 280, legend = c("Original","Smoothed","Modelled"), 
+       ncol = 1,fill = c("black","coral3","darkorchid2"), cex = 0.55, box.lty = 0, 
+       text.font = 1,horiz = FALSE,inset = 0.02,bg = NULL)
 
 # Stationarity tests on the residual time series -----
 resi_close_price <-
@@ -477,7 +478,7 @@ ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_
     show.legend = FALSE,
     linetype = "dashed"
   )  +
-  labs(title = "Actual and Predicted Close Price - Decompostion") +
+  labs(title = "Actual and Predicted Close Price - Error: 1.026") +
   scale_color_manual(labels = c("predicted"), values = c("blue")) +
   theme_economist() +
   theme(
@@ -536,7 +537,7 @@ ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_
     show.legend = FALSE,
     linetype = "dashed"
   )  +
-  labs(title = "Actual Close Price and Predicted Close Price - ARIMA") +
+  labs(title = "Actual and Predicted Close Price - ARIMA Error - 1.079") +
   scale_color_manual(labels = c("predicted"), values = c("blue")) +
   theme_economist() +
   theme(
