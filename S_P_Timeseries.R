@@ -41,7 +41,7 @@ str(sp_historical_data)
 # DATA PREPARATION ----
 
 
-# REMOVE UNWANTED COLUMNS ----
+# Remove unwanted columns  ----
 
 # remove the redundant columns symbol, name, class_type_of
 # "SPY", "SPDR S&P500", "S_P_500"
@@ -342,7 +342,7 @@ for (i in 1:length(alpha)) {
   )
   
 }
-# Comments = Clearly, from Holts Method best smoothing happens when alpha is ~ 0.1
+# Comments: Clearly, from Holts Method best smoothing happens when alpha is ~ 0.1
 
 smoothing_holts <-
   HoltWinters(
