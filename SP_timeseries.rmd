@@ -1,0 +1,112 @@
+# Time Series Analysis of S&P 500
+
+-----------------------------
+#Business Understandading
+-----------------------------
+Business objective:
+
+Please apply any machine learning algorithm you are comfortable with for predicting this time series
+
+The results would be measured on:
+
+1. Accuracy - How good are predictions
+
+2. Visualization - How well are you able to convey your idea graphically
+
+3. Code Cleanliness - How well have you documented your code in an easy language to understand. No need for excess code
+
+
+---
+title: "S_P_Timeseries"
+author: "Vijay Mudivedu"
+date: "6/6/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include=FALSE}
+
+library(tseries)
+library(xts)
+library(tidyverse)
+library(reshape2)
+library(forecast)
+library(lubridate)
+library(ggthemes)
+```
+
+Read Data from the CSV
+
+```{r read data}
+sp_historical_data <- read.csv(file = "Data/historical_data.csv")
+dim(sp_historical_data)
+head(sp_historical_data)
+str(sp_historical_data)
+```
+
+-----------------------------
+## Data Understanding
+-----------------------------
+
+### DATA PREPARATION 
+
+### Remove Unwanted Columns
+
+ Remove the redundant columns symbol, name, class_type_of  "SPY", "SPDR S&P500", "S_P_500"
+
+```{r}
+sp_historical_cleaned <-
+  sp_historical_data[,-which(names(sp_historical_data) %in% c("symbol", "name", "class_type_of"))]
+head(sp_historical_cleaned)
+
+```
+
+ Check for NAs ----
+```{r}
+
+sapply(
+  sp_historical_cleaned,
+  FUN = function(x)
+    sum(is.na(x))
+)
+```
+
+ Comments: NAs found in Lead_1, Lead_2 and Lead_10
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
