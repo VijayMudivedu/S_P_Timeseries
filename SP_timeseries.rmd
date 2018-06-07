@@ -6,7 +6,7 @@ editor_options:
 # Time Series Analysis of S&P 500
 
 
-# Business Understandading
+### Business Understandading
 
 Business objective:
 
@@ -15,9 +15,7 @@ Please apply any machine learning algorithm you are comfortable with for predict
 The results would be measured on:
 
 1. Accuracy - How good are predictions
-
 2. Visualization - How well are you able to convey your idea graphically
-
 3. Code Cleanliness - How well have you documented your code in an easy language to understand. No need for excess code
 
 
@@ -45,32 +43,32 @@ library(ggthemes)
 
 Read Data from the CSV
 
-```{r read data}
+```{r echo=FALSE}
 sp_historical_data <- read.csv(file = "Data/historical_data.csv")
 dim(sp_historical_data)
 head(sp_historical_data)
 str(sp_historical_data)
 ```
 
------------------------------
-## Data Understanding
------------------------------
 
-### DATA PREPARATION 
+### Data Understanding
 
-### Remove Unwanted Columns
+#### Data Preparation
 
- Remove the redundant columns symbol, name, class_type_of  "SPY", "SPDR S&P500", "S_P_500"
+* Remove Unwanted Columns
 
-```{r}
+Remove the redundant columns symbol, name, class_type_of  "SPY", "SPDR S&P500", "S_P_500"
+
+```{r echo=FALSE}
 sp_historical_cleaned <-
   sp_historical_data[,-which(names(sp_historical_data) %in% c("symbol", "name", "class_type_of"))]
 head(sp_historical_cleaned)
 
 ```
 
- Check for NAs ----
-```{r}
+* Check for NAs 
+
+```{r echo=FALSE}
 
 sapply(
   sp_historical_cleaned,
@@ -78,36 +76,90 @@ sapply(
     sum(is.na(x))
 )
 ```
+ *Comments*: NAs found in Lead_1, Lead_2 and Lead_10
 
- Comments: NAs found in Lead_1, Lead_2 and Lead_10
+* Query to find  NAs
 
+```{R echo=FALSE}
+na_leads <-
+  sapply(sp_historical_cleaned[, which(names(sp_historical_cleaned) %in%
+                                         c("lead_1", "lead_5", "lead_10"))],
+         function(x)
+           which(is.na.data.frame(x)))
+dim(sp_historical_cleaned)
+```
+*Comments*: NAs were identified in lead_1, lead_5, lead_10
 
-```{r}
+* NAs in Lead_1, Lead_5, Lead_10 are:
+```{R echo=FALSE}
+na_leads
+```
+
+* Remove NAs from lead_10
+```{R echo=FALSE}
+sp_historical_cleaned <- sp_historical_cleaned[-na_leads$lead_10, ]
+dim(sp_historical_cleaned)
+```
+
+* NAs in lead_1 and lead_5 are:
+```{R echo=FALSE}
+na_leads_iter1 <-
+  sapply(sp_historical_cleaned[, which(names(sp_historical_cleaned) %in% c("lead_1", "lead_5", "lead_10"))],
+         function(x)
+           which(is.na.data.frame(x)))
+
+na_leads_iter1
+```
+
+* Removing the NAs from lead_1 remaining the rows and columns are
+```{R echo=FALSE}
+sp_historical_cleaned <-
+  sp_historical_cleaned[-(na_leads_iter1$lead_1),]
+dim(sp_historical_cleaned)
+```
+
+* NAs in Lead 5 are:
+```{R echo=FALSE}
+na_leads_iter2 <-
+  sapply(sp_historical_cleaned[, which(names(sp_historical_cleaned) %in% c("lead_1", "lead_5", "lead_10"))],
+         function(x)
+           which(is.na.data.frame(x)))
+na_leads_iter2
+
+```
+
+* Removing the NAs from lead_5, remaining the rows and columns are:
+
+```{R echo=FALSE}
+sp_historical_cleaned <-
+  sp_historical_cleaned[-na_leads_iter2$lead_5,]
+dim(x = sp_historical_cleaned)
+```
+
+```{r echo=FALSE}
 head(sp_historical_cleaned)
 ```
 
-# check for outliers in close_price ----
-```{r}
+* check for outliers in close_price 
+```{r echo=FALSE}
 ggplot(data = sp_historical_data,aes(x = symbol,y = close_price)) + geom_boxplot()
 ```
-# Comments: No outliers found
+*Comments*: No outliers found
 
-# Converting factors to Characters ----
-
-# Convert the date to R date format ----
-```{r}
+* Convert the date to R date format 
+```{r echo=FALSE}
 sp_historical_cleaned$date_txn <-
-  mdy(sp_historical_cleaned$date_txn) #%>%  head()
+  mdy(sp_historical_cleaned$date_txn) 
+head(sp_historical_cleaned$date_txn)
 ```
-# check for uniuqes and duplicates ----
-```{r}
+* Check for uniuqes and duplicates 
+```{r echo=FALSE}
 sum(duplicated(x = sp_historical_data$date_txn))
 ```
-# Comments: No duplicates found
+*Comments*: No duplicates found
 
-# Check for invalid valid data ----
-# checking for minimum dips 
-```{r}
+* Check for invalid valid data - checking for minimum dips 
+```{r echo=FALSE}
 # sp_historical_cleaned[which.min(x = sp_historical_cleaned$open), ]
 # sp_historical_cleaned[which.min(x = sp_historical_cleaned$low), ]
 # sp_historical_cleaned[which.min(x = sp_historical_cleaned$high), ]
@@ -119,14 +171,20 @@ sapply(sp_historical_cleaned[,-1], function(x) which.min(x))
 
 
 ```
-# There is bad data in open, low, high, lead_1, thus considering the "close_price"
+*Comments* : There is bad data in variables open, low, high, lead_1, thus considering the "close_price"
 
-#-----------------------------
-# EXPLORATORY DATA ANALYSIS ----
-#-----------------------------
+#### Exploratory Data Analyis
 
-# Plotting the datasets 
-```{r}
+
+* Plotting the datasets 
+
+```{R echo=FALSE}
+sapply(sp_historical_cleaned, function(x) sum(is.na(x)))
+```
+
+
+
+```{r echo=FALSE}
 ggplot(data = sp_historical_cleaned) + geom_line(aes(x = date_txn,y = close_price)) +
   geom_line(aes(x = date_txn,y = lead_1, col = "chartresue1")) + #+ +
   geom_line(aes(date_txn,lead_5,col = "red")) + # 
@@ -140,11 +198,12 @@ ggplot(data = sp_historical_cleaned) + geom_line(aes(x = date_txn,y = close_pric
         axis.title.y = element_blank(),
         legend.text = element_text(size= 8),
         legend.title = element_blank())
+
 ```
 
-# Comments: Thus considering the close_price as the lead_prices do not convey much information
+*Comments*: Thus considering the close_price as the lead_prices do not convey much information
 
-```{r}
+```{r echo=FALSE}
 plot(sp_historical_cleaned$date_txn,
      y = sp_historical_cleaned$open, ylab = "", xlab = "", main = "Open, low, high Price",
      type = "l")
@@ -168,9 +227,10 @@ lines(
 )
 
 ```
-# Univariate analysis
 
-```{r}
+* Univariate analysis
+
+```{r echo=FALSE}
 ggplot(data = sp_historical_cleaned, aes(close_price)) + 
   geom_histogram(aes(x = open, y = ..density.., fill = "red", alpha = 0.5),show.legend = FALSE) +
   geom_density(aes(y = ..density..,alpha = 0.1),show.legend = FALSE) +
@@ -182,22 +242,22 @@ ggplot(data = sp_historical_cleaned, aes(close_price)) +
         axis.text.y = element_blank()
         )
 ```
-# Comments: Most of the Pricing data is concentrated around 200 - 240
+ *Comments*: Most of the Pricing data is concentrated around 200 - 240
 
-# TIME-SERIES OBJECT ----
-
-# Creating a time series object of "sp_historical_cleaned"
-```{r}
+#### Time Series Object: Creating a time series object of "sp_historical_cleaned"
+```{r echo=FALSE}
 sp_historical_ts <-  xts(x = sp_historical_cleaned[, -1], order.by = sp_historical_cleaned[, 1]) 
+
+head(sp_historical_ts)
 ```
 
-```{r}
+```{r echo=FALSE}
 par(mfrow = c(2,2))
 
 # Daily close price
 plot(apply.daily(x = sp_historical_ts$close_price, FUN = mean), main = "Daily", cex = 0.4)
 
-# Weekly close price ----
+# Weekly close price 
 plot(
   apply.weekly(x = sp_historical_ts$close_price, FUN = mean),
   type = "l", cex = 0.4,
@@ -205,14 +265,14 @@ plot(
   main = "Weekly"
 )
 
-# monthly close price ----
+# monthly close price 
 plot(
   apply.monthly(x = sp_historical_ts$close_price, FUN = mean),
   col = "red",cex = 0.4,
   main = "Monthly"
 )
 
-# quaterly close price ----
+# quaterly close price 
 plot(
   apply.quarterly(x = sp_historical_ts$close_price, FUN = mean),
   col = "blue", cex = 0.4,
@@ -222,18 +282,18 @@ plot(
 
 ```
 
-#-----------------
-# Breaking the dataset into Training and Validation datasets ----
-#-----------------
-```{r}
+
+#### Training and Validation datasets 
+
+```{r echo=FALSE}
 test_rows <- 30  # one month data used for validation
 training_rows <-
   nrow(sp_historical_cleaned) - test_rows  # training dataset has 600 rows
 
-# training dataset ----
+# training dataset 
 sp_train <- sp_historical_cleaned[1:training_rows, ] #
 
-# test dataset ----
+# test dataset 
 sp_test <-
   sp_historical_cleaned[(training_rows + 1):(training_rows + test_rows), ]
 tail(sp_train)
@@ -241,13 +301,15 @@ head(sp_test)
 dim(sp_train)
 dim(sp_test)
 ```
-#-----------------
-# Smoothing ----
-#----------------
-# window width
-```{r}
+
+### Smoothing
+
+#### Smoothing using Classical Decomposition
+* window width
+```{r echo=FALSE}
 w <- 9
 
+w
 
 smoothed_moving_avg <-
   stats::filter(
@@ -259,15 +321,15 @@ smoothed_moving_avg <-
 
 ```
 
-# printing the smooted moving average ----
+* Printing the smooted moving average: 
 
-```{r}
+```{r echo=FALSE}
 head(smoothed_moving_avg,n = 20)
 ```
 
-# replacing the induced NAs as result of smoothing
+* Replacing the induced NAs as result of smoothing
 
-```{r}
+```{r echo=FALSE}
 lead_nas <- smoothed_moving_avg[w + 2] - smoothed_moving_avg[w + 1]
 
 trail_nas <-
@@ -275,16 +337,18 @@ trail_nas <-
 lead_nas
 trail_nas
 ```
-# Replacing the lagging NAs are a result of windowing of moving average ----
-```{r}
+
+* Replacing the lagging NAs are a result of windowing of moving average 
+```{r echo=FALSE}
 for (i in seq(w, 1, -1)) {
   smoothed_moving_avg[i] <- smoothed_moving_avg[i + 1] - lead_nas #[i]
 }
 
 smoothed_moving_avg %>% head(n = 20)
 ```
-# Replacing the smoothed leading NAs ----
-```{r}
+
+* Replacing the smoothed leading NAs 
+```{r echo=FALSE}
 for (i in (training_rows - w - 1):(training_rows)) {
   smoothed_moving_avg[i] <-
     smoothed_moving_avg[i - 1] + trail_nas #[(i - (training_rows - w - 1 ))]
@@ -293,7 +357,8 @@ for (i in (training_rows - w - 1):(training_rows)) {
 smoothed_moving_avg %>% tail(n = 20)
 ```
 
-```{r}
+* Plotting the Smoothed Close Price
+```{r echo=FALSE}
 
 par(mfrow = c(1,1))
 
@@ -309,8 +374,8 @@ lines(smoothed_moving_avg, col = "darkgoldenrod3", lwd = 4)
 
 ```
 
-# Smoothing using Holts method ----
-```{r}
+#### Smoothing using Holts method 
+```{r echo=FALSE}
 alpha = seq(from = 0.09, to = 0.3, by = 0.1)
 plot(
   x = sp_historical_cleaned$close_price,
@@ -327,7 +392,6 @@ ln_colrs = c(
   "aquamarine",
   "black"
 )
-
 
 for (i in 1:length(alpha)) {
   smoothing_holts <-
@@ -346,9 +410,9 @@ for (i in 1:length(alpha)) {
   
 }
 ```
-# Comments: Clearly, from Holts Method best smoothing happens when alpha is ~ 0.1
+*Comments*: Clearly, from Holts Method best smoothing happens when alpha is ~ 0.1
 
-```{r}
+```{r echo=FALSE}
 smoothing_holts <-
   HoltWinters(
     x = sp_historical_cleaned$close_price,
@@ -358,14 +422,16 @@ smoothing_holts <-
   )
 ```
 
-# Find smoothed series ----
-```{r}
+* Holts smoothed series Plot
+
+```{r echo=FALSE}
 plot(sp_historical_cleaned$close_price, type = "l", main = "Smoothed Series for alpha = 0.1", ylab = "", xlab = "")
 lines(smoothing_holts$fitted[, 1], type = "l", col = "red")
 ```
 
-# Creating a new dat frame for close_price and dates
-```{r}
+* Creating a new dat frame for close_price and dates
+
+```{r echo=FALSE}
 smoothed_df <-
   cbind(index(sp_train), as.data.frame(smoothed_moving_avg))
 names(smoothed_df) <- c("months_smoothed", "smoothed_close_price")
@@ -373,10 +439,10 @@ names(smoothed_df) <- c("months_smoothed", "smoothed_close_price")
 head(smoothed_df)
 ```
 
-#--------------------
-# Model Building ----
-#--------------------
-```{r}
+
+### Model Building 
+
+```{r echo=FALSE}
 plot(sp_historical_cleaned$close_price,
      lwd = 1,
      type = "l",
@@ -387,7 +453,7 @@ plot(sp_historical_cleaned$close_price,
 lines(smoothed_df$smoothed_close_price,
       col = "coral3",
       lwd = 2)
-# using the linear model fit
+# using the linear model fit  
 
 fit.close_price <-
   lm(
@@ -411,51 +477,62 @@ legend(x = 1,y = 280, legend = c("Original","Smoothed","Modelled"),
        ncol = 1,fill = c("black","coral3","darkorchid2"), cex = 0.55, box.lty = 0, 
        text.font = 1,horiz = FALSE,inset = 0.02,bg = NULL)
 ```
+*Comments*: With adjusted R-Squared with accuracy of 96.2% is the best fit curve and it has also generated the least MAPE error of 1%.
 
-# Stationarity tests on the residual time series -----
-```{r}
+
+* Stationarity tests on the residual time series:
+
+```{r echo=FALSE}
 resi_close_price <-
   sp_train$close_price - fit.close_price$fitted.values
+head(resi_close_price)
 ```
-# adf test
 
-```{r}
+* adf test and kpss test for stationarity:
+
+```{r echo=FALSE}
 adf.test(x = resi_close_price, alternative = "stationary")
 kpss.test(x = resi_close_price)
 
-# Comments: resi_close_price is Stationary
 ```
+*Comments*: From these tests it can be inferred that there is enough evidence to prove that the "resi_close_price"" is Stationary. 
 
-```{r}
+* ACF and PACF Plots are:
+
+```{r echo=FALSE}
 acf(x = resi_close_price) # AR =0  There is no auto regressive component
 pacf(x = resi_close_price) # MA = 0 , there is no moving average noise component
 # AR = 0 and MA = 0
 
 Arima(y = resi_close_price)
 ```
-# This has a very small sigma square, with a very high log likelihood. In addition to this this is AR(0) and MA(0) time series
+*Comments*: This has a very small sigma square, with a very high log likelihood. In addition to this this is AR(0) and MA(0) time series
 
 
-# checking the noise and stationarity of the time series using the box-Ljung test
-```{r}
+* checking the noise and stationarity of the time series using the box-Ljung test
+
+```{r echo=FALSE}
 Box.test(x = resi_close_price, type = "Ljung-Box")
 ```
-# Comments: thus the p-value of the time-series is very low making it a good fit to call it a Strictly Stationary time series.
+*Comments*: thus the p-value of the time-series is very low making it a good fit to call it a Strictly Stationary time series.
 
 
-# qqPlot of the residual timeseries
-```{r}
+* QQPlot of the residual timeseries
+
+```{r echo=FALSE}
 qqplot(x = smoothed_df$months_smoothed , y = resi_close_price)
 ```
-# Comments:  QQ plot represent a time-series that is stationary
+*Comments*:  QQ plot suggests that Close_price time-series is stationary
 
-# Plotting the histogram of the residual time-series represents a Gaussian Curve
-```{r}
+* Plotting the histogram of the residual time-series represents a Gaussian Curve
+
+```{r echo=FALSE}
 hist(resi_close_price, main = "Residual Series")
 ```
 
-# Checking the properities of Residual time-series by inspection
-```{r}
+* Checking the properities of Residual time-series by inspection
+
+```{r echo=FALSE}
 plot(
   x = resi_close_price,
   type = "l",
@@ -464,15 +541,14 @@ plot(
   xlab = ""
 )
 ```
-# Comments: Thus, it is also clear from the plots ARIMA, ADF test, KPSS test the that the time series is stationary
+*Comments*: Thus, it is also clear from the plots ARIMA, ADF test, KPSS test the that the time series is stationary
 
 
-#------------------------------------
-# MODEL EVALUATION ----
-#------------------------------------
+### Model Evaluation
 
-# predicting the values fitted model from the vadlidation dataset ----
-```{r}
+* Predicting the values fitted model from the vadlidation dataset 
+
+```{r echo=FALSE}
 test_months <-
   as.data.frame((training_rows + 1):(training_rows + test_rows))
 names(test_months) <- "months_smoothed"
@@ -482,25 +558,26 @@ pred_close_price_train <-
   predict(object = fit.close_price, newdata = test_months)
 ```
 
-# MAPE ERROR CALCULATION - ACCURACY PREDICTION
-```{r}
+* MAPE Error - Accuracy Calculation
+
+```{r echo=FALSE}
 MAPE_close_price <-
   accuracy(pred_close_price_train, sp_test$close_price)[5]
 MAPE_close_price
 ```
-#COMMENTS: Thus with a MAPE error of just 1.0268, model is apparently a very good fit.
+*Comments*: Thus with a MAPE error of just 1.0268, model is apparently a very good fit.
 
-# combining the predicted values train and test data
-```{r}
+* Combining the predicted values train and test data
+
+```{r echo=FALSE}
 sp_historical_cleaned$predicted_close_price <-
   c(fit.close_price$fitted.values, pred_close_price_train)
 
-library(ggthemes)
 ```
 
-# Plottig the actual vs the predicted data, using classical decomposition
+* Plottig the actual vs the predicted data, using classical decomposition
 
-```{r}
+```{r echo=FALSE}
 ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_line() +
   geom_line(aes(x = date_txn, y = predicted_close_price, col = "green")) +
   geom_vline(
@@ -521,13 +598,12 @@ ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_
   )
 ```
 
-#------------------------------------------
-# PREDICTION ANALYSIS USING AUTO.ARIMA ----
-#------------------------------------------
 
+### PREDICTION ANALYSIS USING AUTO.ARIMA
 
-# Modelling auto arima
-```{r}
+#### Modelling auto arima
+
+```{r echo=FALSE}
 fit.autoarima.close_price <-
   auto.arima(sp_train$close_price,
              allowdrift = F,
@@ -539,8 +615,9 @@ summary(fit.autoarima.close_price)
 close_price_autoarima_fitted <-  fit.autoarima.close_price$fitted
 ```
 
-# Predicting the Validation dataset 
-```{r}
+* Predicting the Validation dataset 
+
+```{r echo=FALSE}
 close_price_autoarima_fitted_test <-
   predict(fit.autoarima.close_price , n.ahead = 30)
 
@@ -555,8 +632,9 @@ lines(close_price_autoarima_fitted,
       col = "red")
 ```
 
-# Computing the MAPE of Close Price
-```{r}
+* MAPE of Close Price Using Auto Arima. 
+
+```{r echo=FALSE}
 MAPE_close_price_arima <-
   accuracy(
     close_price_autoarima_fitted_test$pred,
@@ -566,14 +644,15 @@ MAPE_close_price_arima
 ```
 
 
-# combining the predicted training and testing to plot
-```{r}
+* Combining the predicted training and testing to plot
+
+```{r echo=FALSE}
 sp_historical_cleaned$arima_close_price <-
   c(close_price_autoarima_fitted,
     close_price_autoarima_fitted_test$pred)
 ```
 
-# Combined plot of Arima
+* Combined plot of Arima
 
 ```{r echo=FALSE}
 ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_line() +
@@ -597,32 +676,10 @@ ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_
 ```
 
 
+### Conclusion
 
+* Thus the Accuracy result using the MAPE using Classicial Decomposition is 1.03 which is less than Auto.Arima Modelling 1.08 and Classical Decompsition has had higher accuracy*
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 
 
