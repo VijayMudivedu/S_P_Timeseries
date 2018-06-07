@@ -1,6 +1,6 @@
 
 #-----------------------------
-# Business Understandading
+# BUSINESS UNDERSTANDING ----
 #-----------------------------
 # Business objective:
 #
@@ -9,14 +9,14 @@
 
 remove(list = ls())
 
-# 
-# install.packages("tseries")
-# install.packages("xts")
-# install.packages("tidyverse")
-# install.packages("reshape2")
-# install.packages("forecast")
-# install.packages("lubridate")
-# install.packages("ggthemes")
+
+install.packages("tseries")
+install.packages("xts")
+install.packages("tidyverse")
+install.packages("reshape2")
+install.packages("forecast")
+install.packages("lubridate")
+install.packages("ggthemes")
 
 
 library(tseries)
@@ -35,7 +35,7 @@ head(sp_historical_data)
 str(sp_historical_data)
 
 #-----------------------------
-# Data Understanding
+# Data Understanding ----
 #-----------------------------
 
 # DATA PREPARATION ----
@@ -142,7 +142,7 @@ sp_historical_cleaned[which.min(x = sp_historical_cleaned$lead_10), ]
 # There is bad data in open, low, high, lead_1, thus considering the "close_price"
 
 #-----------------------------
-# EXPLORATORY DATA ANALYSIS
+# EXPLORATORY DATA ANALYSIS ----
 #-----------------------------
 
 # Plotting the datasets 
@@ -200,7 +200,8 @@ ggplot(data = sp_historical_cleaned, aes(close_price)) +
 
 # Comments: Most of the Pricing data is concentrated around 200 - 240
 
-# TIME-SERIES OBJECT
+# TIME-SERIES OBJECT ----
+
 # Creating a time series object of "sp_historical_cleaned"
 sp_historical_ts <-  xts(x = sp_historical_cleaned[, -1], order.by = sp_historical_cleaned[, 1]) 
 
@@ -209,7 +210,7 @@ par(mfrow = c(2,2))
 # Daily close price
 plot(apply.daily(x = sp_historical_ts$close_price, FUN = mean), main = "Daily", cex = 0.4)
 
-# Weekly close price
+# Weekly close price ----
 plot(
   apply.weekly(x = sp_historical_ts$close_price, FUN = mean),
   type = "l", cex = 0.4,
@@ -217,14 +218,14 @@ plot(
   main = "Weekly"
 )
 
-# monthly close price
+# monthly close price ----
 plot(
   apply.monthly(x = sp_historical_ts$close_price, FUN = mean),
   col = "red",cex = 0.4,
   main = "Monthly"
 )
 
-# quaterly close price
+# quaterly close price ----
 plot(
   apply.quarterly(x = sp_historical_ts$close_price, FUN = mean),
   col = "blue", cex = 0.4,
@@ -233,7 +234,7 @@ plot(
 
 
 #-----------------
-# Breaking the dataset into Training and Validation datasets
+# Breaking the dataset into Training and Validation datasets ----
 #-----------------
 
 test_rows <- 30  # one month data used for validation
@@ -251,7 +252,7 @@ head(sp_test)
 dim(sp_train)
 dim(sp_test)
 #-----------------
-# Smoothing
+# Smoothing ----
 #----------------
 # window width
 w <- 9
@@ -364,7 +365,7 @@ names(smoothed_df) <- c("months_smoothed", "smoothed_close_price")
 head(smoothed_df)
 
 #--------------------
-# Model Building
+# Model Building ----
 #--------------------
 plot(sp_historical_cleaned$close_price,
      lwd = 1,
@@ -442,7 +443,7 @@ plot(
 # Comments: Thus, it is also clear from the plots ARIMA, ADF test, KPSS test the that the time series is stationary
 
 #------------------------------------
-# MODEL EVALUATION
+# MODEL EVALUATION ----
 #------------------------------------
 
 # predicting the values fitted model from the vadlidation dataset ----
@@ -492,7 +493,7 @@ ggplot(data = sp_historical_cleaned, aes(x = date_txn, y = close_price)) + geom_
 
 
 #------------------------------------------
-# PREDICTION ANALYSIS USING AUTO.ARIMA
+# PREDICTION ANALYSIS USING AUTO.ARIMA ----
 #------------------------------------------
 
 plot(sp_historical_cleaned$close_price,
